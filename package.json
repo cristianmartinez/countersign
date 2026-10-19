@@ -1,0 +1,42 @@
+{
+  "name": "countersign",
+  "private": true,
+  "packageManager": "pnpm@9.15.9",
+  "engines": {
+    "node": ">=22.22.0"
+  },
+  "scripts": {
+    "dev": "concurrently --kill-others -n docs,app \"pnpm dev:docs\" \"pnpm dev:app\"",
+    "types": "pnpm --filter @countersign/web types && pnpm --filter @countersign/send types",
+    "typecheck": "pnpm -r typecheck",
+    "build": "pnpm --filter @countersign/web build && pnpm --filter @countersign/send build && tsx scripts/check-send-bundle.ts && pnpm --filter @countersign/docs build",
+    "db:migrate": "pnpm --filter @countersign/web db:migrate",
+    "check": "pnpm format:check && pnpm docs:check && pnpm types && pnpm typecheck && pnpm test:types && pnpm test && pnpm build",
+    "test": "vitest run && vitest run --config vitest.node.config.mts",
+    "test:types": "tsc -p tests/tsconfig.json && tsc -p scripts/tsconfig.json && tsc -p browser-tests/tsconfig.json",
+    "accounts": "tsx scripts/accounts.ts",
+    "test:browser": "playwright test",
+    "docs:generate": "pnpm --filter @countersign/react-email render && tsx scripts/docs.ts",
+    "docs:check": "pnpm --filter @countersign/react-email check:render && tsx scripts/docs.ts --check",
+    "dev:app": "wrangler dev -c apps/web/wrangler.jsonc -c apps/send/wrangler.jsonc --persist-to .wrangler/state",
+    "dev:docs": "pnpm --filter @countersign/docs dev",
+    "format": "prettier --write . --ignore-unknown",
+    "format:check": "prettier --check . --ignore-unknown"
+  },
+  "devDependencies": {
+    "@cloudflare/vitest-plugin": "^1.4.5",
+    "@cloudflare/workers-types": "5.20261019.1",
+    "@playwright/test": "^1.64.1",
+    "@types/node": "^26.6.5",
+    "ajv": "8.20.0",
+    "ajv-formats": "3.0.1",
+    "concurrently": "10.0.6",
+    "prettier": "3.9.10",
+    "prettier-plugin-astro": "1.1.1",
+    "tsx": "^4.23.15",
+    "typescript": "7.0.2",
+    "vitest": "^5.0.5",
+    "wrangler": "4.151.2"
+  },
+  "type": "module"
+}

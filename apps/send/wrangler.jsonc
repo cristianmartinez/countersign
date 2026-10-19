@@ -1,0 +1,95 @@
+{
+  "$schema": "../../node_modules/wrangler/config-schema.json",
+  "name": "countersign-send",
+  "main": "src/index.ts",
+  "alias": {
+    "@react-email/render": "./src/disabled-renderer.ts",
+  },
+  "compatibility_date": "2026-10-19",
+  "compatibility_flags": ["nodejs_compat"],
+  "observability": {
+    "enabled": true,
+    "head_sampling_rate": 1,
+  },
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "countersign",
+      "database_id": "00000000-0000-0000-0000-000000000000",
+      "migrations_dir": "../../packages/db/migrations",
+    },
+  ],
+  "queues": {
+    "producers": [
+      {
+        "binding": "SEND_QUEUE",
+        "queue": "countersign-send",
+      },
+    ],
+    "consumers": [
+      {
+        "queue": "countersign-send",
+        "max_batch_size": 1,
+        "max_retries": 3,
+        "dead_letter_queue": "countersign-send-dlq",
+        "max_concurrency": 1,
+      },
+    ],
+  },
+  "workers_dev": false,
+  "preview_urls": false,
+  "triggers": {
+    "crons": ["* * * * *"],
+  },
+  "vars": {
+    "SEND_ENABLED": "false",
+    "SENDER_EMAIL": "countersign@mail.cristianmartinez.co",
+    "NODE_ENV": "production",
+  },
+  "secrets": {
+    "required": ["RESEND_API_KEY"],
+  },
+  "env": {
+    "production": {
+      "name": "countersign-send-production",
+      "workers_dev": false,
+      "preview_urls": false,
+      "d1_databases": [
+        {
+          "binding": "DB",
+          "database_name": "countersign-production",
+          "database_id": "00000000-0000-0000-0000-000000000000",
+          "migrations_dir": "../../packages/db/migrations",
+        },
+      ],
+      "queues": {
+        "producers": [
+          {
+            "binding": "SEND_QUEUE",
+            "queue": "countersign-send-production",
+          },
+        ],
+        "consumers": [
+          {
+            "queue": "countersign-send-production",
+            "max_batch_size": 1,
+            "max_retries": 3,
+            "dead_letter_queue": "countersign-send-production-dlq",
+            "max_concurrency": 1,
+          },
+        ],
+      },
+      "vars": {
+        "SEND_ENABLED": "true",
+        "SENDER_EMAIL": "countersign@mail.cristianmartinez.co",
+        "NODE_ENV": "production",
+      },
+      "triggers": {
+        "crons": ["* * * * *"],
+      },
+      "secrets": {
+        "required": ["RESEND_API_KEY"],
+      },
+    },
+  },
+}

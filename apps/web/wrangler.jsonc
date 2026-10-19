@@ -1,0 +1,80 @@
+{
+  "$schema": "../../node_modules/wrangler/config-schema.json",
+  "name": "countersign-web",
+  "main": "src/index.tsx",
+  "compatibility_date": "2026-10-19",
+  "compatibility_flags": ["nodejs_compat"],
+  "build": {
+    "command": "pnpm --filter @countersign/web build:ui",
+    "watch_dir": ["ui", "src/components"],
+  },
+  "assets": {
+    "directory": "./public",
+    "not_found_handling": "none",
+  },
+  "observability": {
+    "enabled": true,
+    "head_sampling_rate": 1,
+  },
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "countersign",
+      "database_id": "00000000-0000-0000-0000-000000000000",
+      "migrations_dir": "../../packages/db/migrations",
+    },
+  ],
+  "queues": {
+    "producers": [
+      {
+        "binding": "SEND_QUEUE",
+        "queue": "countersign-send",
+      },
+    ],
+  },
+  "secrets": {
+    "required": ["AGENT_KEY_ENCRYPTION_KEY", "RESEND_WEBHOOK_SECRET"],
+  },
+  "vars": {
+    "SENDER_EMAIL": "countersign@mail.cristianmartinez.co",
+    "SEND_ENABLED": "false",
+    "DOCS_URL": "http://localhost:4321",
+  },
+  "env": {
+    "production": {
+      "name": "countersign-web-production",
+      "workers_dev": false,
+      "preview_urls": false,
+      "d1_databases": [
+        {
+          "binding": "DB",
+          "database_name": "countersign-production",
+          "database_id": "00000000-0000-0000-0000-000000000000",
+          "migrations_dir": "../../packages/db/migrations",
+        },
+      ],
+      "queues": {
+        "producers": [
+          {
+            "binding": "SEND_QUEUE",
+            "queue": "countersign-send-production",
+          },
+        ],
+      },
+      "vars": {
+        "SEND_ENABLED": "true",
+        "SENDER_EMAIL": "countersign@mail.cristianmartinez.co",
+        "DOCS_URL": "https://countersign-docs.cristianmartinez.co",
+      },
+      "routes": [
+        {
+          "pattern": "countersign.cristianmartinez.co",
+          "custom_domain": true,
+        },
+      ],
+      "secrets": {
+        "required": ["AGENT_KEY_ENCRYPTION_KEY", "RESEND_WEBHOOK_SECRET"],
+      },
+    },
+  },
+}

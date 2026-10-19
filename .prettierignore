@@ -1,0 +1,26 @@
+# Dependencies, runtime state and build output
+node_modules/
+.wrangler/
+dist/
+.astro/
+playwright-report/
+test-results/
+apps/web/public/assets/
+pnpm-lock.yaml
+
+# Secrets and generated binding declarations
+.dev.vars*
+.env*
+**/worker-configuration.d.ts
+
+# Generated contracts, rendered email payloads and vendored fixtures
+docs/openapi.json
+docs/ONBOARDING.md
+examples/react-email/draft.json
+tests/fixtures/
+apps/docs/src/content/docs/generated/
+apps/docs/public/SKILL.md
+apps/docs/public/openapi.json
+apps/docs/public/onboarding.md
+apps/docs/public/llms.txt
+apps/docs/public/examples/

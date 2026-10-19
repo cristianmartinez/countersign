@@ -1,0 +1,5 @@
+# Generate a random 32-byte hex value privately. Do not use this placeholder.
+AGENT_KEY_ENCRYPTION_KEY=replace-with-64-random-hex-characters
+
+# From the Resend webhook endpoint settings; this is not a sending API key.
+RESEND_WEBHOOK_SECRET=whsec_replace_with_endpoint_signing_secret
