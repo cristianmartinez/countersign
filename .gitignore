@@ -1,0 +1,31 @@
+node_modules/
+.wrangler/
+dist/
+.dev.vars
+.dev.vars.*
+.env
+.env.*
+!.env.example
+!.dev.vars.example
+playwright-report/
+test-results/
+
+apps/web/public/assets/
+
+# Starlight caches and source-derived documentation artifacts.
+.astro/
+apps/docs/src/content/docs/generated/
+apps/docs/public/SKILL.md
+apps/docs/public/openapi.json
+apps/docs/public/onboarding.md
+apps/docs/public/llms.txt
+apps/docs/public/examples/
+
+# Private planning and workstation guidance; public explanation lives in README.md.
+/docs/*
+!/docs/openapi.json
+!/docs/ONBOARDING.md
+AGENTS.md
+apps/docs/README.md
+apps/web/ui/README.md
+examples/react-email/README.md
