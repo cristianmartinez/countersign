@@ -1,0 +1,19 @@
+{
+  "name": "@countersign/react-email",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "typecheck": "tsc -p tsconfig.json",
+    "render": "tsx scripts/render.ts",
+    "check:render": "tsx scripts/render.ts --check"
+  },
+  "dependencies": {
+    "react": "19.3.1",
+    "react-dom": "19.3.1",
+    "react-email": "6.11.3"
+  },
+  "devDependencies": {
+    "@types/react": "^19",
+    "@types/react-dom": "^19"
+  }
+}
