@@ -46,6 +46,19 @@ export const agents = sqliteTable("agents", {
   review_version: integer().notNull().default(0),
 });
 
+export const reviewerAccessLinks = sqliteTable(
+  "reviewer_access_links",
+  {
+    token_hash: text().primaryKey(),
+    reviewer_id: text()
+      .notNull()
+      .references(() => reviewers.id),
+    expires_at: integer().notNull(),
+    revoked_at: integer(),
+  },
+  (t) => [index("reviewer_access_links_reviewer").on(t.reviewer_id)],
+);
+
 export const reviewerSessions = sqliteTable(
   "reviewer_sessions",
   {
@@ -57,6 +70,7 @@ export const reviewerSessions = sqliteTable(
     expires_at: integer().notNull(),
     csrf_hash: text().notNull().default(""),
     auth_version: integer().notNull().default(1),
+    access_token_hash: text().references(() => reviewerAccessLinks.token_hash),
   },
   (t) => [index("sessions_expiry").on(t.expires_at)],
 );

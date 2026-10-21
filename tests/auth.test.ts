@@ -552,3 +552,137 @@ it("invalid login forms offer recovery without creating a session", async () => 
     expect(await response.text()).toContain('href="/login"');
   }
 });
+
+it("stores access-link hashes, scopes sessions, and permits reuse for exactly seven days", async () => {
+  let now = Date.now();
+  const store = new AuthStore(db, () => now);
+  const link = await store.issueAccessLink(user.reviewer_id);
+
+  expect(link.expires_at).toBe(now + 7 * 86400000);
+  const row = await db
+    .prepare("SELECT * FROM reviewer_access_links WHERE token_hash=?")
+    .bind(link.token_hash)
+    .first();
+  expect(JSON.stringify(row)).not.toContain(link.token);
+
+  const first = await store.loginWithAccessLink(link.token);
+  const second = await store.loginWithAccessLink(link.token, first.token);
+  expect(await store.session(first.token)).toBeNull();
+  expect(await store.session(second.token)).toMatchObject({
+    reviewer_id: user.reviewer_id,
+  });
+
+  now = link.expires_at - 1000;
+  const last = await store.loginWithAccessLink(link.token);
+  expect((await store.session(last.token))?.expires_at).toBe(link.expires_at);
+  now = link.expires_at;
+  expect(await store.session(last.token)).toBeNull();
+  await expect(store.loginWithAccessLink(link.token)).rejects.toMatchObject({
+    code: "unauthorized",
+  });
+});
+
+it("revokes linked sessions without affecting other links and rejects agent credentials", async () => {
+  const store = new AuthStore(db);
+  const link = await store.issueAccessLink(user.reviewer_id);
+  const independent = await store.issueAccessLink(user.reviewer_id);
+  const session = await store.loginWithAccessLink(link.token);
+  const retained = await store.loginWithAccessLink(independent.token);
+
+  await store.revokeAccessLink(other.reviewer_id, link.token_hash);
+  expect(await store.session(session.token)).not.toBeNull();
+  await store.revokeAccessLink(user.reviewer_id, link.token_hash);
+  expect(await store.session(session.token)).toBeNull();
+  expect(await store.session(retained.token)).not.toBeNull();
+  await expect(store.loginWithAccessLink(link.token)).rejects.toMatchObject({
+    code: "unauthorized",
+  });
+  await expect(
+    store.loginWithAccessLink("cs_review_" + "0".repeat(64)),
+  ).rejects.toMatchObject({ code: "unauthorized" });
+  await expect(
+    store.loginWithAccessLink(
+      (await store.reveal(user.reviewer_id, secret)).key,
+    ),
+  ).rejects.toMatchObject({ code: "unauthorized" });
+});
+
+it("password reset revokes access links as well as sessions", async () => {
+  const store = new AuthStore(db);
+  const created = await store.provision(
+    account("link-reset@example.com"),
+    secret,
+  );
+  const link = await store.issueAccessLink(created.reviewer_id);
+  const session = await store.loginWithAccessLink(link.token);
+
+  await store.resetPassword(created.reviewer_id, "replacement secure password");
+
+  expect(await store.session(session.token)).toBeNull();
+  await expect(store.loginWithAccessLink(link.token)).rejects.toMatchObject({
+    code: "unauthorized",
+  });
+});
+
+it("exchanges links only with same-origin CSRF, sets secure cookies, and preserves API isolation", async () => {
+  const store = new AuthStore(db);
+  const link = await store.issueAccessLink(user.reviewer_id);
+  const page = await app.request("https://service.test/access", {}, bindings);
+  const html = await page.text();
+  const csrf = /data-csrf="([^"]+)"/.exec(html)![1]!;
+
+  expect(page.headers.get("cache-control")).toBe("no-store");
+  expect(page.headers.get("referrer-policy")).toBe("no-referrer");
+  expect(html).not.toContain(link.token);
+
+  const redeem = (origin: string, token: string, value = csrf) =>
+    app.request(
+      "https://service.test/access/redeem",
+      {
+        method: "POST",
+        headers: {
+          Origin: origin,
+          Cookie: `__Host-cs_login=${csrf}`,
+          "Content-Type": "application/x-www-form-urlencoded",
+        },
+        body: new URLSearchParams({ token, csrf: value }),
+      },
+      bindings,
+    );
+
+  expect((await redeem("https://evil.test", link.token)).status).toBe(403);
+  expect(
+    (await redeem("https://service.test", link.token, "wrong")).status,
+  ).toBe(403);
+  expect((await redeem("https://service.test", "invalid")).status).toBe(401);
+  const response = await redeem("https://service.test", link.token);
+  expect(response.status).toBe(200);
+  expect(await response.json()).toEqual({ redirect: "/review" });
+  const cookies = response.headers.get("set-cookie")!;
+  expect(cookies).toContain("HttpOnly");
+  expect(cookies).toContain("Secure");
+  expect(cookies).toContain("SameSite=Strict");
+  const token = /__Host-cs_session=([^;,]+)/.exec(cookies)![1]!;
+  expect((await store.session(token))?.reviewer_id).toBe(user.reviewer_id);
+  expect(
+    (
+      await app.request(
+        "https://service.test/v1/me",
+        { headers: { Authorization: `Bearer ${link.token}` } },
+        bindings,
+      )
+    ).status,
+  ).toBe(401);
+  expect(
+    (
+      await app.request(
+        "https://service.test/access/redeem",
+        {
+          method: "POST",
+          headers: { Authorization: "Bearer cs_agent_invalid" },
+        },
+        bindings,
+      )
+    ).status,
+  ).toBe(403);
+});

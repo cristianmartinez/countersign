@@ -1,3 +1,4 @@
+import "./access-link";
 import {
   ReviewDetail,
   type ReviewDetailProps,

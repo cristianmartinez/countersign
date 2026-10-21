@@ -9,6 +9,7 @@ import emailExample from "../examples/react-email/draft.json" with { type: "json
 
 let proxy: PlatformProxy<Env>,
   loginEmail: string,
+  reviewerId: string,
   draft: string,
   revision: string,
   rejectDraft: string,
@@ -60,6 +61,7 @@ test.beforeAll(async () => {
     );
 
   loginEmail = `browser-${id}@example.com`;
+  reviewerId = account.reviewer_id;
 
   const store = new DraftStore(proxy.env.DB),
     created = await store.create(account.agent_id, randomToken(), {
@@ -844,4 +846,30 @@ test("five-second polling updates in place, skips unchanged snapshots and preser
     path: "test-results/live-status-polling.png",
     fullPage: true,
   });
+});
+
+test("private access links clear the URL, establish a reviewer session and honor revocation", async ({
+  page,
+}) => {
+  const store = new AuthStore(proxy.env.DB);
+  const link = await store.issueAccessLink(reviewerId);
+  const requestUrls: string[] = [];
+  page.on("request", (request) => requestUrls.push(request.url()));
+
+  await page.goto(`/access#${link.token}`);
+  await expect(page).toHaveURL("http://localhost:8791/review");
+  await expect(
+    page.getByRole("heading", { name: "Emails", exact: true }),
+  ).toBeVisible();
+  expect(requestUrls.every((url) => !url.includes(link.token))).toBe(true);
+
+  await store.revokeAccessLink(reviewerId, link.token_hash);
+  await page.reload();
+  await expect(page).toHaveURL("http://localhost:8791/login");
+
+  await page.goto(`/access#${link.token}`);
+  await expect(page.getByRole("status")).toHaveText(
+    "This access link is invalid or has expired.",
+  );
+  expect(new URL(page.url()).hash).toBe("");
 });

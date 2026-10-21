@@ -22,6 +22,8 @@ const auth = new Hono<{ Bindings: Env; Variables: { session: Session } }>();
 
 const reviewerPath = (path: string) =>
   path === "/login" ||
+  path === "/access" ||
+  path === "/access/redeem" ||
   path === "/logout" ||
   path === "/connect" ||
   path.startsWith("/connect/");
@@ -140,6 +142,63 @@ auth.get("/login", (c) => {
 function originMatches(request: Request) {
   return request.headers.get("Origin") === new URL(request.url).origin;
 }
+
+auth.get("/access", (c) => {
+  const csrf = randomToken();
+
+  setCookie(c, LOGIN, csrf, { ...options, maxAge: 600 });
+  c.header("Referrer-Policy", "no-referrer");
+  c.header("X-Robots-Tag", "noindex, nofollow");
+  c.header(
+    "Content-Security-Policy",
+    "default-src 'none'; script-src 'self'; style-src 'self'; connect-src 'self'; form-action 'self'; frame-ancestors 'none'; base-uri 'none'",
+  );
+
+  return c.html(
+    <Page login docsUrl={c.env.DOCS_URL}>
+      <div id="access-link-root" data-csrf={csrf}>
+        <p role="status">Signing in…</p>
+        <noscript>JavaScript is required to use this access link.</noscript>
+        <a href="/login">Sign in with a password</a>
+      </div>
+      <script type="module" src="/assets/ui-client.js"></script>
+    </Page>,
+  );
+});
+
+auth.post("/access/redeem", async (c) => {
+  c.header("Referrer-Policy", "no-referrer");
+  const form = await c.req.parseBody();
+  const csrf = getCookie(c, LOGIN);
+
+  if (
+    !originMatches(c.req.raw) ||
+    typeof form.csrf !== "string" ||
+    !csrf ||
+    (await sha256(form.csrf)) !== (await sha256(csrf))
+  )
+    return c.json({ error: { code: "csrf_invalid" } }, 403);
+
+  if (typeof form.token !== "string")
+    return c.json({ error: { code: "unauthorized" } }, 401);
+
+  const result = await new AuthStore(c.env.DB).loginWithAccessLink(
+    form.token,
+    getCookie(c, COOKIE),
+  );
+
+  setCookie(c, COOKIE, result.token, {
+    ...options,
+    maxAge: LIMITS.sessionSeconds,
+  });
+  setCookie(c, CSRF, result.csrf, {
+    ...options,
+    maxAge: LIMITS.sessionSeconds,
+  });
+  deleteCookie(c, LOGIN, options);
+
+  return c.json({ redirect: "/review" });
+});
 
 auth.post("/login", async (c) => {
   const invalidForm = () =>

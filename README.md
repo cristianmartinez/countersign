@@ -6,7 +6,7 @@ Agents prepare emails, humans review them, and Resend sends the approved revisio
 
 ## Try it
 
-Reviewer credentials are shared privately.
+Reviewer credentials are shared privately. A private seven-day access link can also sign you in; keep it separate from the agent setup prompt.
 
 1. Sign in, open **Connect your agent** and copy the setup prompt into your agent.
 2. Ask: “Prepare a short onboarding follow-up email to `delivered@resend.dev`, submit it for approval and return the review link.”
@@ -80,6 +80,8 @@ pnpm dev
 The provisioning JSON requires `email`, `name`, `password`, `recipient` and `agentName`. Use a strong password and `delivered@resend.dev` for the test recipient. Sign in to reveal the linked agent's setup prompt. Keep provisioning files and credentials out of Git.
 
 App: `http://localhost:8787`. Docs: `http://localhost:4321`.
+
+For local access links, run `pnpm accounts link < /path/to/private-link-input.json` with `reviewer_id`, `origin` and an `output` path inside `.wrangler/`. The command saves a private file containing the link, expiry and token hash. `pnpm accounts revoke-link` accepts `reviewer_id` and `token_hash` on stdin and revokes the link's sessions too. Password resets also revoke access links.
 
 ### Deploy your own instance
 

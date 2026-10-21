@@ -1,6 +1,12 @@
 import { and, eq, gt, sql } from "drizzle-orm";
 import { database, type Database } from "./client";
-import { reviewers, agents, reviewerSessions, loginThrottles } from "./schema";
+import {
+  reviewers,
+  agents,
+  reviewerSessions,
+  reviewerAccessLinks,
+  loginThrottles,
+} from "./schema";
 import {
   hashPassword,
   verifyPassword,
@@ -112,6 +118,10 @@ export class AuthStore {
       this.db
         .delete(reviewerSessions)
         .where(eq(reviewerSessions.reviewer_id, reviewer)),
+      this.db
+        .update(reviewerAccessLinks)
+        .set({ revoked_at: this.now() })
+        .where(eq(reviewerAccessLinks.reviewer_id, reviewer)),
     ]);
 
     if (!result[0]?.meta.changes) throw new AuthError("not_found");
@@ -188,6 +198,7 @@ export class AuthStore {
           ),
           csrf_hash: sql`${csrfHash}`.as("csrf_hash"),
           auth_version: reviewers.auth_version,
+          access_token_hash: sql`NULL`.as("access_token_hash"),
         })
         .from(reviewers)
         .where(
@@ -223,6 +234,92 @@ export class AuthStore {
     return { token, csrf, reviewer_id: row.id };
   }
 
+  async issueAccessLink(reviewer: string) {
+    const token = "cs_review_" + randomToken();
+    const tokenHash = await sha256(token);
+    const expiresAt = this.now() + 7 * 24 * 60 * 60 * 1000;
+
+    const result = await this.db.insert(reviewerAccessLinks).select(
+      this.db
+        .select({
+          token_hash: sql`${tokenHash}`.as("token_hash"),
+          reviewer_id: reviewers.id,
+          expires_at: sql`${expiresAt}`.as("expires_at"),
+          revoked_at: sql`NULL`.as("revoked_at"),
+        })
+        .from(reviewers)
+        .where(eq(reviewers.id, reviewer)),
+    );
+
+    if (!result.meta.changes) throw new AuthError("not_found");
+
+    return { token, token_hash: tokenHash, expires_at: expiresAt };
+  }
+
+  async revokeAccessLink(reviewer: string, tokenHash: string) {
+    await this.db
+      .update(reviewerAccessLinks)
+      .set({ revoked_at: this.now() })
+      .where(
+        and(
+          eq(reviewerAccessLinks.token_hash, tokenHash),
+          eq(reviewerAccessLinks.reviewer_id, reviewer),
+        ),
+      );
+  }
+
+  async loginWithAccessLink(value: string, oldToken?: string) {
+    if (!/^cs_review_[a-f0-9]{64}$/.test(value))
+      throw new AuthError("unauthorized");
+
+    const hash = await sha256(value);
+    const now = this.now();
+    const token = randomToken();
+    const csrf = randomToken();
+    const tokenHash = await sha256(token);
+    const csrfHash = await sha256(csrf);
+
+    // Validate the link and create the session in one statement; revocation cannot race a prior read.
+    const result = await this.db.batch([
+      this.db.insert(reviewerSessions).select(
+        this.db
+          .select({
+            token_hash: sql`${tokenHash}`.as("token_hash"),
+            reviewer_id: reviewers.id,
+            created_at: sql`${now}`.as("created_at"),
+            expires_at:
+              sql`min(${reviewerAccessLinks.expires_at}, ${now + LIMITS.sessionSeconds * 1000})`.as(
+                "expires_at",
+              ),
+            csrf_hash: sql`${csrfHash}`.as("csrf_hash"),
+            auth_version: reviewers.auth_version,
+            access_token_hash: reviewerAccessLinks.token_hash,
+          })
+          .from(reviewerAccessLinks)
+          .innerJoin(
+            reviewers,
+            eq(reviewers.id, reviewerAccessLinks.reviewer_id),
+          )
+          .where(
+            sql`${reviewerAccessLinks.token_hash}=${hash} AND ${reviewerAccessLinks.expires_at}>${now} AND ${reviewerAccessLinks.revoked_at} IS NULL`,
+          ),
+      ),
+      ...(oldToken
+        ? [
+            this.db
+              .delete(reviewerSessions)
+              .where(
+                sql`${reviewerSessions.token_hash}=${await sha256(oldToken)} AND EXISTS(SELECT 1 FROM reviewer_sessions WHERE token_hash=${tokenHash})`,
+              ),
+          ]
+        : []),
+    ]);
+
+    if (!result[0]?.meta.changes) throw new AuthError("unauthorized");
+
+    return { token, csrf };
+  }
+
   async session(token: string | undefined): Promise<Session | null> {
     if (!token) return null;
 
@@ -241,6 +338,7 @@ export class AuthStore {
             eq(reviewerSessions.token_hash, await sha256(token)),
             gt(reviewerSessions.expires_at, this.now()),
             eq(reviewerSessions.auth_version, reviewers.auth_version),
+            sql`(${reviewerSessions.access_token_hash} IS NULL OR EXISTS (SELECT 1 FROM reviewer_access_links l WHERE l.token_hash=${reviewerSessions.access_token_hash} AND l.reviewer_id=${reviewerSessions.reviewer_id} AND l.revoked_at IS NULL AND l.expires_at>${this.now()}))`,
           ),
         )
         .get()) ?? null
