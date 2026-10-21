@@ -1,0 +1,22 @@
+{
+  "name": "@countersign/docs",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "sync": "tsx ../../scripts/docs-site.ts",
+    "dev": "pnpm sync && astro dev --host 127.0.0.1 --port 4321 --ignore-lock",
+    "build": "pnpm sync && astro build",
+    "preview": "astro preview --host 127.0.0.1 --port 4321 --ignore-lock",
+    "typecheck": "pnpm sync && astro check",
+    "build:worker": "wrangler deploy --dry-run"
+  },
+  "dependencies": {
+    "@astrojs/markdown-remark": "^7.3.0",
+    "@astrojs/starlight": "0.42.6",
+    "astro": "7.4.1"
+  },
+  "devDependencies": {
+    "@astrojs/check": "0.9.11",
+    "typescript": "6.0.3"
+  }
+}
