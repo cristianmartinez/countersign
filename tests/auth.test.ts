@@ -664,6 +664,38 @@ it("exchanges links only with same-origin CSRF, sets secure cookies, and preserv
   expect(cookies).toContain("SameSite=Strict");
   const token = /__Host-cs_session=([^;,]+)/.exec(cookies)![1]!;
   expect((await store.session(token))?.reviewer_id).toBe(user.reviewer_id);
+
+  const sessionCsrf = /__Host-cs_csrf=([^;,]+)/.exec(cookies)![1]!;
+  const revealed = await app.request(
+    "https://service.test/connect/reveal",
+    {
+      method: "POST",
+      headers: {
+        Origin: "https://service.test",
+        Cookie: `__Host-cs_session=${token}; __Host-cs_csrf=${sessionCsrf}`,
+        "Content-Type": "application/x-www-form-urlencoded",
+      },
+      body: new URLSearchParams({ csrf: sessionCsrf }),
+    },
+    bindings,
+  );
+
+  expect(revealed.status).toBe(200);
+
+  const revealedHtml = await revealed.text();
+  const prompt =
+    /<textarea[^>]*id="setup-prompt"[^>]*>([\s\S]*?)<\/textarea>/.exec(
+      revealedHtml,
+    )![1]!;
+  const agent = await store.reveal(user.reviewer_id, secret);
+
+  expect(prompt.match(/cs_agent_[a-f0-9]{64}/g)).toEqual([agent.key]);
+  expect(prompt).not.toMatch(/cs_review_|\/access(?:#|\?|\/)/);
+  for (const credential of [link.token, token, sessionCsrf]) {
+    expect(prompt).not.toContain(credential);
+  }
+  expect(revealedHtml).not.toContain(link.token);
+
   expect(
     (
       await app.request(
