@@ -15,6 +15,10 @@ Reviewer credentials are shared privately. A private seven-day access link can a
 
 Edits need approval before sending. **Sent** means Resend accepted the request; **delivered** means the receiving mail server accepted it. `delivered@resend.dev` is a Resend test address.
 
+## Email lifecycle
+
+![Email workflow across agent, human reviewer and Countersign: prepare, review, approve, send and track delivery. Rejection returns the email for revision.](apps/docs/public/diagrams/email-workflow.svg)
+
 ## Agent API
 
 The setup prompt includes a scoped bearer key. Agents can create, retrieve, revise and submit emails, then check review and sending status. They cannot approve or send directly.
@@ -32,17 +36,7 @@ Use curl or an identified user agent such as `CountersignAgent/1.0`; the deploye
 
 TypeScript, Hono, Drizzle and Cloudflare Workers, D1 and Queues. The review UI uses React, shadcn/ReUI and React Email Editor.
 
-```mermaid
-flowchart LR
-    Agent -->|create, revise, submit| Web[API and review app]
-    Human -->|approve revision and hash| Web
-    Web --> DB[(D1: revisions and outbox)]
-    Web --> Queue
-    Queue --> Sender[Send Worker]
-    Sender --> DB
-    Sender --> Resend
-    Resend -->|signed webhooks| Web
-```
+![System architecture: the agent API, reviewer UI and webhook endpoint share the web Worker; D1 and Queues support a separate sending Worker connected to Resend.](apps/docs/public/diagrams/system-architecture.svg)
 
 Each edit creates an immutable revision. Approval checks its ID and a canonical hash of the sender, recipient, subject, HTML and text. Stale reviews fail, and approved revisions are locked.
 

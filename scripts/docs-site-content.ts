@@ -11,6 +11,13 @@ const root = fileURLToPath(new URL("../", import.meta.url));
 const pages = [["README.md", "project/overview"]] as const;
 
 const destinations = new Map<string, string>([
+  ...["email-workflow", "system-architecture"].map(
+    (name) =>
+      [
+        resolve(root, `apps/docs/public/diagrams/${name}.svg`),
+        `/diagrams/${name}.svg`,
+      ] as const,
+  ),
   ...pages.map(
     ([source, slug]) => [resolve(root, source), `/${slug}/`] as const,
   ),

@@ -1,0 +1,48 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1100" height="710" viewBox="0 0 1100 710" role="img" aria-labelledby="title desc">
+<title id="title">Email approval workflow</title><desc id="desc">Agent, human reviewer and Countersign have separate responsibilities. Only approval permits sending; rejection returns the email for revision.</desc>
+<defs><marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 10 5 0 10" fill="none" stroke="#64748b" stroke-width="1.5"/></marker></defs>
+<rect width="1100" height="710" rx="16" fill="white"/>
+<g font-family="Arial, Helvetica, sans-serif" fill="#172234">
+<text x="30" y="42" font-size="28" font-weight="600" text-anchor="start" fill="#172234">Email approval workflow</text>
+<text x="30" y="78" font-size="18" font-weight="400" text-anchor="start" fill="#172234">The agent prepares. A person decides. Countersign sends the approved revision.</text>
+<rect x="25" y="120" width="1050" height="145" rx="10" fill="#f0f7ff" stroke="#bac5d3"/>
+<g transform="translate(45 145) scale(1.125)" fill="none" stroke="#334155" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="7" width="16" height="13" rx="3"/><path d="M12 3v4M2 11v5m20-5v5M8 16h8"/><circle cx="8" cy="12" r="1"/><circle cx="16" cy="12" r="1"/></g>
+<text x="45" y="202" font-size="17" font-weight="600" text-anchor="start" fill="#172234">Agent</text>
+<rect x="25" y="295" width="1050" height="145" rx="10" fill="#fffbeb" stroke="#bac5d3"/>
+<g transform="translate(45 320) scale(1.125)" fill="none" stroke="#334155" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="7" r="4"/><path d="M4 22v-3a8 8 0 0 1 16 0v3"/></g>
+<text x="45" y="377" font-size="17" font-weight="600" text-anchor="start" fill="#172234">Reviewer</text>
+<rect x="25" y="470" width="1050" height="145" rx="10" fill="#f6f2ff" stroke="#bac5d3"/>
+<g transform="translate(45 495) scale(1.125)" fill="none" stroke="#334155" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="5" width="14" height="14" rx="2"/><path d="M9 1v4m6-4v4M9 19v4m6-4v4M1 9h4m-4 6h4m14-6h4m-4 6h4"/></g>
+<text x="45" y="552" font-size="17" font-weight="600" text-anchor="start" fill="#172234">Countersign</text>
+<rect x="180" y="145" width="195" height="95" rx="10" fill="#cfe6ff" stroke="#bac5d3"/>
+<text x="277.5" y="185" font-size="18" font-weight="600" text-anchor="middle" fill="#172234">1. Prepare + submit</text>
+<text x="277.5" y="213" font-size="16" font-weight="400" text-anchor="middle" fill="#172234">Recipient + content</text>
+<rect x="400" y="320" width="195" height="95" rx="10" fill="#ffedbd" stroke="#bac5d3"/>
+<text x="497.5" y="360" font-size="18" font-weight="600" text-anchor="middle" fill="#172234">2. Review / edit</text>
+<text x="497.5" y="388" font-size="16" font-weight="400" text-anchor="middle" fill="#172234">Save a new revision</text>
+<rect x="620" y="320" width="195" height="95" rx="10" fill="#ffedbd" stroke="#bac5d3"/>
+<text x="717.5" y="360" font-size="18" font-weight="600" text-anchor="middle" fill="#172234">3. Approve</text>
+<text x="717.5" y="388" font-size="16" font-weight="400" text-anchor="middle" fill="#172234">Exact revision</text>
+<rect x="620" y="495" width="195" height="95" rx="10" fill="#e2d6ff" stroke="#bac5d3"/>
+<text x="717.5" y="535" font-size="18" font-weight="600" text-anchor="middle" fill="#172234">4. Send</text>
+<text x="717.5" y="563" font-size="16" font-weight="400" text-anchor="middle" fill="#172234">Approved content</text>
+<rect x="840" y="495" width="210" height="95" rx="10" fill="#e2d6ff" stroke="#bac5d3"/>
+<text x="945.0" y="535" font-size="18" font-weight="600" text-anchor="middle" fill="#172234">5. Track delivery</text>
+<text x="945.0" y="563" font-size="16" font-weight="400" text-anchor="middle" fill="#172234">Sent / delivered / failed</text>
+<rect x="840" y="145" width="210" height="95" rx="10" fill="#cfe6ff" stroke="#bac5d3"/>
+<text x="945.0" y="185" font-size="18" font-weight="600" text-anchor="middle" fill="#172234">6. Read outcome</text>
+<text x="945.0" y="213" font-size="16" font-weight="400" text-anchor="middle" fill="#172234">Review + send status</text>
+<path d="M278 240 V368 H396" fill="none" stroke="#64748b" stroke-width="1.8" marker-end="url(#arrow)"/>
+<rect x="300.2" y="336" width="59.599999999999994" height="24" rx="5" fill="white"/>
+<text x="330" y="353" font-size="15" font-weight="400" text-anchor="middle" fill="#475569">Submit</text>
+<path d="M595 368 H616" fill="none" stroke="#64748b" stroke-width="1.8" marker-end="url(#arrow)"/>
+<path d="M718 415 V491" fill="none" stroke="#64748b" stroke-width="1.8" marker-end="url(#arrow)"/>
+<rect x="661.6" y="437" width="112.8" height="24" rx="5" fill="white"/>
+<text x="718" y="454" font-size="15" font-weight="400" text-anchor="middle" fill="#475569">Approved only</text>
+<path d="M815 543 H836" fill="none" stroke="#64748b" stroke-width="1.8" marker-end="url(#arrow)"/>
+<path d="M1050 543 H1062 V193 H1054" fill="none" stroke="#64748b" stroke-width="1.8" marker-end="url(#arrow)" stroke-dasharray="6 5"/>
+<path d="M498 320 V280 H385 V193 H379" fill="none" stroke="#64748b" stroke-width="1.8" marker-end="url(#arrow)" stroke-dasharray="6 5"/>
+<rect x="464.2" y="263" width="211.6" height="24" rx="5" fill="white"/>
+<text x="570" y="280" font-size="15" font-weight="400" text-anchor="middle" fill="#475569">Reject → revise + resubmit</text>
+<text x="30" y="660" font-size="18" font-weight="400" text-anchor="start" fill="#172234">Edits require a new approval. Rejection sends nothing. Both agent and reviewer can check status.</text>
+</g></svg>
