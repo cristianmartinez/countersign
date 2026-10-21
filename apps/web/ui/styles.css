@@ -1,0 +1,285 @@
+@import "tailwindcss";
+
+@custom-variant dark (&:is(.dark *));
+@source "../src";
+
+:root {
+  --destructive-foreground: var(--color-red-800);
+  --success: var(--color-emerald-500);
+  --success-foreground: var(--color-emerald-900);
+  --info: var(--color-violet-500);
+  --info-foreground: var(--color-violet-900);
+  --warning: var(--color-yellow-500);
+  --warning-foreground: var(--color-yellow-900);
+  --invert: var(--color-zinc-900);
+  --invert-foreground: var(--color-zinc-50);
+}
+
+.dark {
+  --destructive-foreground: var(--color-red-600);
+  --success: var(--color-emerald-500);
+  --success-foreground: var(--color-emerald-600);
+  --info: var(--color-violet-500);
+  --info-foreground: var(--color-violet-600);
+  --warning: var(--color-yellow-500);
+  --warning-foreground: var(--color-yellow-600);
+  --invert: var(--color-zinc-700);
+  --invert-foreground: var(--color-zinc-50);
+}
+
+@theme inline {
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-success: var(--success);
+  --color-success-foreground: var(--success-foreground);
+  --color-info: var(--info);
+  --color-info-foreground: var(--info-foreground);
+  --color-warning: var(--warning);
+  --color-warning-foreground: var(--warning-foreground);
+  --color-invert: var(--invert);
+  --color-invert-foreground: var(--invert-foreground);
+}
+
+:root {
+  --background: oklch(0.985 0 0);
+  --foreground: oklch(0.205 0 0);
+  --card: oklch(1 0 0);
+  --card-foreground: var(--foreground);
+  --primary: oklch(0.205 0 0);
+  --primary-foreground: oklch(0.985 0 0);
+  --secondary: oklch(0.96 0 0);
+  --secondary-foreground: var(--foreground);
+  --muted: oklch(0.96 0 0);
+  --muted-foreground: oklch(0.5 0 0);
+  --border: oklch(0.91 0 0);
+  --input: var(--border);
+  --ring: oklch(0.6 0 0);
+  --destructive: oklch(0.577 0.245 27.325);
+  --focus: var(--primary);
+  --focus-foreground: var(--primary-foreground);
+  --radius: 0.625rem;
+}
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-destructive: var(--destructive);
+  --color-focus: var(--focus);
+  --color-focus-foreground: var(--focus-foreground);
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+}
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply m-0 bg-background font-sans text-foreground antialiased;
+  }
+  main {
+    @apply mx-auto my-8 max-w-5xl rounded-xl border bg-card p-6 shadow-xs sm:p-9;
+  }
+  h1 {
+    @apply mb-3 text-2xl font-semibold tracking-tight;
+  }
+  h2 {
+    @apply mb-3 text-lg font-semibold tracking-tight;
+  }
+  h3 {
+    @apply mb-2 text-sm font-semibold;
+  }
+  h4 {
+    @apply my-2 text-sm font-medium;
+  }
+  p {
+    @apply my-3 text-sm leading-6;
+  }
+  a {
+    @apply underline-offset-4 hover:underline;
+  }
+  a:focus-visible {
+    @apply rounded-sm outline-2 outline-offset-4 outline-ring;
+  }
+  section {
+    @apply my-7 border-t pt-6;
+  }
+  form {
+    @apply my-5;
+  }
+  label:not([data-slot]) {
+    @apply my-3 block text-sm font-medium;
+  }
+  input:not([type="hidden"]):not([data-slot]),
+  textarea:not([data-slot]) {
+    @apply mt-2 block w-full max-w-2xl rounded-lg border bg-background px-3 py-2 text-sm outline-none focus-visible:border-ring focus-visible:ring-2 focus-visible:ring-ring/20;
+  }
+  textarea {
+    @apply min-h-28;
+  }
+  input[readonly],
+  textarea[readonly] {
+    @apply font-mono text-xs;
+  }
+  button {
+    @apply cursor-pointer;
+  }
+  button:not([data-slot]) {
+    @apply rounded-lg border px-3 py-2 text-sm hover:bg-muted;
+  }
+  table {
+    @apply my-6 w-full border-collapse text-sm;
+  }
+  th {
+    @apply border-b bg-muted/50 px-4 py-3 text-left text-xs font-medium text-muted-foreground;
+  }
+  td {
+    @apply border-b px-4 py-4;
+  }
+  td:first-child a {
+    @apply font-medium;
+  }
+  dl {
+    @apply my-6 grid grid-cols-[90px_1fr] gap-x-4 gap-y-3 rounded-lg border p-5 text-sm;
+  }
+  dt {
+    @apply text-muted-foreground;
+  }
+  dd {
+    @apply m-0 wrap-anywhere;
+  }
+  pre {
+    @apply my-3 overflow-auto rounded-lg border bg-muted/50 p-4 font-mono text-xs leading-6 whitespace-pre-wrap wrap-anywhere;
+  }
+  ins {
+    @apply bg-emerald-100 no-underline;
+  }
+  del {
+    @apply bg-red-100;
+  }
+  iframe {
+    @apply h-90 w-full rounded-lg border bg-white;
+  }
+  [role="tablist"]:not([data-slot]) {
+    @apply mb-4 flex flex-wrap gap-2;
+  }
+  button[aria-selected="true"]:not([data-slot]) {
+    @apply border-primary bg-primary text-primary-foreground hover:bg-primary/90;
+  }
+  [hidden] {
+    display: none !important;
+  }
+  @media (max-width: 640px) {
+    main {
+      @apply mx-3 my-4 p-4;
+    }
+    table {
+      @apply text-xs;
+    }
+    th,
+    td {
+      @apply px-2;
+    }
+  }
+}
+@layer components {
+  .app-header {
+    @apply flex min-h-16 w-full flex-wrap items-center justify-between gap-3 border-b px-4 py-4 sm:px-8;
+  }
+  .brand {
+    @apply flex items-center gap-2.5 text-base font-semibold tracking-tight no-underline hover:no-underline;
+  }
+  .brand-mark {
+    @apply flex size-8 items-center justify-center rounded-lg bg-primary font-mono text-lg text-primary-foreground;
+  }
+  .app-header nav {
+    @apply flex flex-wrap gap-5 text-sm text-muted-foreground;
+  }
+  .app-header nav a:hover {
+    @apply text-foreground;
+  }
+  .auth-page main {
+    @apply max-w-2xl;
+  }
+}
+
+.dark {
+  color-scheme: dark;
+  --background: oklch(0.145 0 0);
+  --foreground: oklch(0.985 0 0);
+  --card: oklch(0.205 0 0);
+  --card-foreground: var(--foreground);
+  --primary: oklch(0.922 0 0);
+  --primary-foreground: oklch(0.205 0 0);
+  --secondary: oklch(0.269 0 0);
+  --secondary-foreground: var(--foreground);
+  --muted: oklch(0.269 0 0);
+  --muted-foreground: oklch(0.708 0 0);
+  --border: oklch(1 0 0 / 10%);
+  --input: oklch(1 0 0 / 15%);
+  --ring: oklch(0.556 0 0);
+  --destructive: oklch(0.704 0.191 22.216);
+  --destructive-foreground: var(--color-red-300);
+  --success-foreground: var(--color-emerald-300);
+  --info-foreground: var(--color-violet-300);
+  --warning-foreground: var(--color-yellow-300);
+  --popover: var(--card);
+  --popover-foreground: var(--foreground);
+  --accent: var(--muted);
+  --accent-foreground: var(--foreground);
+}
+@theme inline {
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+}
+@layer components {
+  .login-page main {
+    @apply m-0 flex min-h-[calc(100svh-81px)] max-w-none items-center justify-center rounded-none border-0 bg-transparent p-6 shadow-none;
+  }
+  #login-card-root {
+    @apply w-full max-w-sm;
+  }
+  .dark ins {
+    @apply bg-emerald-950 text-emerald-200;
+  }
+  .dark del {
+    @apply bg-red-950 text-red-200;
+  }
+}
+
+@layer components {
+  main.review-queue,
+  main.review-detail {
+    @apply my-0 max-w-6xl border-0 bg-transparent px-4 py-6 shadow-none sm:px-9;
+  }
+  [data-slot="table"] th {
+    @apply h-8 bg-transparent px-3 py-1 text-xs font-normal;
+  }
+  [data-slot="table"] td {
+    @apply px-3 py-3 text-sm;
+  }
+  [data-slot="table"] tr:last-child td {
+    @apply border-b-0;
+  }
+}
+
+@layer components {
+  .email-editor .tiptap {
+    @apply min-h-64 outline-none;
+  }
+  .email-editor p {
+    @apply my-3 text-black;
+  }
+}
